@@ -74,10 +74,10 @@ export type SkillGroup = {
 export const skills: SkillGroup[] = [
   { label: "Languages", icon: "code", items: ["HTML", "CSS", "JavaScript", "TypeScript"] },
   { label: "Frameworks & Libraries", icon: "layers", items: ["Next.js", "React.js", "Django", "Strapi"] },
-  { label: "Databases", icon: "database", items: ["MongoDB"] },
+  { label: "Soft Skills", icon: "star", items: ["Problem Solving", "Communication", "Strategic Planning"] },
   { label: "Tools & Deployment", icon: "tool", items: ["Vercel", "Git", "GitHub"] },
   { label: "Workflow", icon: "workflow", items: ["Agile", "Figma"] },
-  { label: "Soft Skills", icon: "star", items: ["Problem Solving", "Communication", "Strategic Planning"] },
+  { label: "Databases", icon: "database", items: ["MongoDB"] },
   { label: "Languages Spoken", icon: "globe", items: ["Malay", "English"] },
 ];
 
