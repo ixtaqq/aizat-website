@@ -1,19 +1,27 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Unbounded, Space_Grotesk, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { profile } from "@/lib/data";
 
-const inter = Inter({
-  variable: "--font-inter",
+const display = Unbounded({
+  variable: "--font-display",
   subsets: ["latin"],
   display: "swap",
+  weight: ["700"],
 });
 
-const mono = JetBrains_Mono({
+const sans = Space_Grotesk({
+  variable: "--font-sans",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["400", "500", "700"],
+});
+
+const mono = IBM_Plex_Mono({
   variable: "--font-mono",
   subsets: ["latin"],
   display: "swap",
-  weight: ["400", "500"],
+  weight: ["400", "600"],
 });
 
 export const metadata: Metadata = {
@@ -32,10 +40,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${mono.variable} h-full`}
-      style={{ fontFamily: "var(--font-inter), ui-sans-serif, system-ui, sans-serif" }}
+      className={`${display.variable} ${sans.variable} ${mono.variable} h-full`}
     >
-      <body className="min-h-full flex flex-col antialiased" suppressHydrationWarning>{children}</body>
+      <body className="h-full antialiased" suppressHydrationWarning>{children}</body>
     </html>
   );
 }
