@@ -42,3 +42,8 @@ For agent-driven browser preview, `.claude/launch.json` defines the `aizat-websi
 - `src/app/api/resume/route.ts` — serves the resume PDF.
 - `public/` — static assets: resume PDF, portrait, per-project preview images (`<slug>-preview.png`), PDF.js worker.
 - Projects are added as entries in the `projects` array in `data.ts` (`title`, `year`, `category`, `description`, `details`, `tech`, `url`, `github`, `preview`) — `url`/`github`/`preview` are nullable when not applicable.
+
+## Shared agent workflow
+
+Read `E:\workspace\agent-homebase\PROJECT-WORKFLOW.md` for the shared workflow.
+Use the globally available skills that match the task and the project checks above.
