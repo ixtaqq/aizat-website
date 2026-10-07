@@ -10,29 +10,39 @@ export function ResumeModal({ onClose }: { onClose: () => void }) {
   const [numPages, setNumPages] = useState(0);
   const [containerWidth, setContainerWidth] = useState(600);
   const [pdfSrc, setPdfSrc] = useState<string>("");
+  const [failed, setFailed] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
+  function close() {
+    dialogRef.current?.close();
+    onClose();
+  }
 
   useEffect(() => {
-    fetch("/api/resume")
-      .then((res) => res.json())
+    const controller = new AbortController();
+    const dialog = dialogRef.current;
+    dialog?.showModal();
+    fetch("/api/resume", { signal: controller.signal })
+      .then((res) => {
+        if (!res.ok) throw new Error("Resume could not be loaded");
+        return res.json();
+      })
       .then((json) => setPdfSrc(json.data))
-      .catch(console.error);
+      .catch((error) => { if (error.name !== "AbortError") setFailed(true); });
 
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
-    }
-    window.addEventListener("keydown", onKey);
+    const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
-      window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
+      controller.abort();
+      dialog?.close();
+      document.body.style.overflow = previousOverflow;
     };
-  }, [onClose]);
+  }, []);
 
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    setContainerWidth(el.clientWidth);
     const observer = new ResizeObserver(([entry]) => {
       setContainerWidth(entry.contentRect.width);
     });
@@ -41,14 +51,16 @@ export function ResumeModal({ onClose }: { onClose: () => void }) {
   }, []);
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
-      onClick={onClose}
+    <dialog
+      ref={dialogRef}
+      className="preview-dialog"
+      aria-labelledby="resume-title"
+      onCancel={(event) => { event.preventDefault(); close(); }}
+      onClick={(event) => { if (event.target === event.currentTarget) close(); }}
     >
       <div
-        className="flex w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl"
-        style={{ height: "min(90vh, 860px)" }}
-        onClick={(e) => e.stopPropagation()}
+        className="flex w-full flex-col overflow-hidden bg-surface"
+        style={{ height: "min(90dvh, 860px)" }}
       >
         {/* Header */}
         <div className="flex shrink-0 items-center justify-between border-b border-border bg-base px-4 py-3">
@@ -59,7 +71,7 @@ export function ResumeModal({ onClose }: { onClose: () => void }) {
               </svg>
             </span>
             <div>
-              <p className="text-sm font-semibold text-white">{profile.name} — Resume</p>
+              <h2 id="resume-title" className="text-sm font-semibold text-text">{profile.name} — Resume</h2>
               <p className="text-xs text-muted">
                 {numPages > 0 ? `${numPages} page${numPages > 1 ? "s" : ""}` : "Loading…"}
               </p>
@@ -70,7 +82,7 @@ export function ResumeModal({ onClose }: { onClose: () => void }) {
             <a
               href={profile.cv}
               download
-              className="inline-flex items-center gap-1.5 rounded-full bg-accent px-4 py-1.5 text-xs font-semibold text-base transition-opacity hover:opacity-80"
+              className="inline-flex items-center gap-1.5 rounded bg-accent px-3 py-1.5 text-xs font-semibold text-[var(--color-base)] transition-opacity hover:opacity-80"
             >
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
@@ -78,9 +90,9 @@ export function ResumeModal({ onClose }: { onClose: () => void }) {
               Download
             </a>
             <button
-              onClick={onClose}
-              className="rounded-lg p-1.5 text-muted transition-colors hover:text-white"
-              aria-label="Close"
+              onClick={close}
+              className="rounded p-1.5 text-muted transition-colors hover:text-accent"
+              aria-label="Close resume"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -91,11 +103,16 @@ export function ResumeModal({ onClose }: { onClose: () => void }) {
 
         {/* PDF canvas viewer */}
         <div ref={containerRef} className="flex-1 overflow-y-auto bg-[#404040] p-4">
-          <Document
+          {failed ? (
+            <div className="flex h-40 flex-col items-center justify-center gap-3 text-sm text-white" role="alert">
+              <p>Could not load PDF preview.</p>
+              <a href={profile.cv} download className="underline">Download resume instead</a>
+            </div>
+          ) : <Document
             file={pdfSrc || null}
             onLoadSuccess={({ numPages }) => setNumPages(numPages)}
             loading={
-              <div className="flex h-40 items-center justify-center gap-2 text-sm text-muted">
+              <div className="flex h-40 items-center justify-center gap-2 text-sm text-white">
                 <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
@@ -104,9 +121,9 @@ export function ResumeModal({ onClose }: { onClose: () => void }) {
               </div>
             }
             error={
-              <div className="flex h-40 flex-col items-center justify-center gap-3 text-sm text-muted">
+              <div className="flex h-40 flex-col items-center justify-center gap-3 text-sm text-white">
                 <p>Could not load PDF preview.</p>
-                <a href={profile.cv} download className="text-accent hover:underline">
+                <a href={profile.cv} download className="underline">
                   Download instead
                 </a>
               </div>
@@ -123,9 +140,9 @@ export function ResumeModal({ onClose }: { onClose: () => void }) {
                 />
               </div>
             ))}
-          </Document>
+          </Document>}
         </div>
       </div>
-    </div>
+    </dialog>
   );
 }

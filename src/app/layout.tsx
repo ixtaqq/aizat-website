@@ -10,7 +10,7 @@ const inter = Inter({
 });
 
 const mono = JetBrains_Mono({
-  variable: "--font-mono",
+  variable: "--font-jetbrains",
   subsets: ["latin"],
   display: "swap",
   weight: ["400", "500"],
@@ -33,9 +33,11 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${inter.variable} ${mono.variable} h-full`}
-      style={{ fontFamily: "var(--font-inter), ui-sans-serif, system-ui, sans-serif" }}
     >
-      <body className="min-h-full flex flex-col antialiased" suppressHydrationWarning>{children}</body>
+      <body className="min-h-full antialiased">
+        <a className="skip-link" href="#main-content">Skip to content</a>
+        {children}
+      </body>
     </html>
   );
 }

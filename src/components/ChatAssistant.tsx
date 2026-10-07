@@ -16,23 +16,17 @@ const SUGGESTIONS = [
 
 export function ChatAssistant() {
   const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      role: "assistant",
+      content:
+        "Hi! I'm Aizat's AI assistant. Ask me anything about his background, skills, or projects.",
+    },
+  ]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (open && messages.length === 0) {
-      setMessages([
-        {
-          role: "assistant",
-          content:
-            "Hi! I'm Aizat's AI assistant. Ask me anything about his background, skills, or projects.",
-        },
-      ]);
-    }
-  }, [open, messages.length]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -103,7 +97,7 @@ export function ChatAssistant() {
           }
         }
       }
-    } catch (err) {
+    } catch {
       setMessages((prev) => {
         const updated = [...prev];
         updated[updated.length - 1] = {
@@ -136,13 +130,13 @@ export function ChatAssistant() {
                 </svg>
               </span>
               <div>
-                <p className="text-sm font-semibold text-white">Aizat&apos;s Assistant</p>
+                <p className="text-sm font-semibold text-text">Aizat&apos;s Assistant</p>
                 <p className="text-xs text-muted">Ask me anything</p>
               </div>
             </div>
             <button
               onClick={() => setOpen(false)}
-              className="rounded-lg p-1 text-muted transition-colors hover:text-white"
+              className="rounded-lg p-1 text-muted transition-colors hover:text-accent"
               aria-label="Close chat"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -161,7 +155,7 @@ export function ChatAssistant() {
                 <div
                   className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 leading-relaxed ${
                     msg.role === "user"
-                      ? "bg-accent text-base rounded-br-sm"
+                      ? "bg-accent text-[var(--color-base)] rounded-br-sm"
                       : "border border-border bg-base text-muted rounded-bl-sm"
                   }`}
                 >
@@ -204,12 +198,13 @@ export function ChatAssistant() {
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask about Aizat…"
               disabled={streaming}
-              className="flex-1 bg-transparent text-sm text-white placeholder-muted outline-none disabled:opacity-50"
+              aria-label="Ask about Aizat"
+              className="min-w-0 flex-1 bg-transparent text-sm text-text placeholder-muted disabled:opacity-50"
             />
             <button
               type="submit"
               disabled={!input.trim() || streaming}
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-base transition-opacity hover:opacity-80 disabled:opacity-30"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-[var(--color-base)] transition-opacity hover:opacity-80 disabled:opacity-30"
               aria-label="Send"
             >
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
@@ -223,7 +218,7 @@ export function ChatAssistant() {
       {/* Floating bubble */}
       <button
         onClick={() => setOpen((v) => !v)}
-        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-accent text-base shadow-lg transition-transform hover:scale-105 active:scale-95 md:right-8"
+        className="fixed bottom-5 right-5 z-30 flex h-11 w-11 items-center justify-center rounded-full border border-border bg-base text-accent shadow-sm transition-transform hover:scale-105 active:scale-95 md:right-8"
         aria-label={open ? "Close chat" : "Open chat"}
       >
         {open ? (

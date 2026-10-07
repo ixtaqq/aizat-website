@@ -7,6 +7,7 @@ import {
   skills,
   projects,
   education,
+  certifications,
   extracurricular,
 } from "@/lib/data";
 
@@ -27,7 +28,7 @@ function buildSystemPrompt(): string {
   const projectsText = projects
     .map(
       (p) =>
-        `- ${p.title} (${p.year}): ${p.description} Tech: ${p.tech.join(", ")}.${p.url ? ` Live: ${p.url}` : ""}${p.github ? ` GitHub: ${p.github}` : ""}`
+        `- ${p.title} (${p.year}): ${p.description}${p.highlight ? ` ${p.highlight}` : ""} Tech: ${p.tech.join(", ")}.${p.url ? ` Live: ${p.url}` : ""}${p.github ? ` GitHub: ${p.github}` : ""}`
     )
     .join("\n");
 
@@ -36,6 +37,10 @@ function buildSystemPrompt(): string {
       (e) =>
         `- ${e.degree} — ${e.school} (${e.period})${e.award ? `, ${e.award}` : ""}`
     )
+    .join("\n");
+
+  const certificationsText = certifications
+    .map((c) => `- ${c.name} — ${c.issuer} (certificate of completion, ${c.year})`)
     .join("\n");
 
   return `You are an AI assistant on ${profile.name}'s personal portfolio website. Answer questions about ${profile.firstName} based only on the information below. Be friendly, concise, and professional. If asked something not covered here, say you don't have that information but visitors can reach ${profile.firstName} directly at ${profile.email}.
@@ -48,7 +53,7 @@ Email: ${profile.email}
 Phone: ${profile.phone}
 GitHub: ${profile.github}
 LinkedIn: ${profile.linkedin}
-Current Company: ${profile.currentCompany}
+Availability: ${profile.availability} (not currently employed)
 Tagline: ${profile.tagline}
 
 ## About
@@ -65,6 +70,9 @@ ${projectsText}
 
 ## Education
 ${educationText}
+
+## Certifications
+${certificationsText}
 
 ## Extracurricular
 ${extracurricular.join(", ")}`;
